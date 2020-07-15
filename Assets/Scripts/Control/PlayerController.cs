@@ -7,8 +7,8 @@ namespace Sandbox.Control
     public class PlayerController : MonoBehaviour
     {
         [SerializeField] float jumpForce = 30f;
-        [SerializeField] float forwardThrust = 30f;
-        [SerializeField] float lateralThrust = 30f;
+        [SerializeField] float thrust = 30f;
+        [SerializeField] float turnSpeed = 30f;
 
         Rigidbody playerRigidbody;
         bool onTheGround = true;
@@ -33,12 +33,14 @@ namespace Sandbox.Control
 
             if (Input.GetAxis("Vertical") != 0)
             {
-                playerRigidbody.AddForce(Vector3.forward * forwardThrust * Input.GetAxis("Vertical"));
+                playerRigidbody.AddForce(transform.forward * thrust * Input.GetAxis("Vertical"));
             }
 
             if (Input.GetAxis("Horizontal") != 0)
             {
-                playerRigidbody.AddForce(Vector3.right * lateralThrust * Input.GetAxis("Horizontal"));
+                playerRigidbody.freezeRotation = false;
+                transform.Rotate(Vector3.up, Input.GetAxis("Horizontal") * turnSpeed);
+                playerRigidbody.freezeRotation = true;
             }
         }
 
