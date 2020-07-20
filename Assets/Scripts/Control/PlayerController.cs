@@ -8,14 +8,15 @@ namespace Sandbox.Control
     {
         [SerializeField] float jumpForce = 30f;
         [SerializeField] float thrust = 30f;
-        [SerializeField] float turnSpeed = 30f;
+        [SerializeField] float turnSpeed = 2f;
 
         Rigidbody playerRigidbody;
         bool onTheGround = true;
 
-        private void Start() 
+        private void Start()
         {
             playerRigidbody = GetComponent<Rigidbody>();
+            playerRigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
         }
 
         private void Update()
@@ -25,26 +26,28 @@ namespace Sandbox.Control
 
         private void ProcessInput()
         {
+            float inputX = Input.GetAxis("Horizontal");
+            float inputZ = Input.GetAxis("Vertical");
+
+            if (inputX != 0 || inputZ != 0)
+            {
+                playerRigidbody.AddForce(transform.forward * thrust);
+
+                Vector3 lookDirection = new Vector3(inputX, 0, inputZ);
+                Quaternion lookRotation = Quaternion.LookRotation(lookDirection, Vector3.up);
+
+                float step = turnSpeed * Time.deltaTime;
+                transform.rotation = Quaternion.RotateTowards(lookRotation, Quaternion.identity, step);
+            }
+
             if (Input.GetAxis("Jump") == 1 && onTheGround)
             {
                 onTheGround = false;
                 playerRigidbody.AddForce(Vector3.up * jumpForce);
             }
-
-            if (Input.GetAxis("Vertical") != 0)
-            {
-                playerRigidbody.AddForce(transform.forward * thrust * Input.GetAxis("Vertical"));
-            }
-
-            if (Input.GetAxis("Horizontal") != 0)
-            {
-                playerRigidbody.freezeRotation = false;
-                transform.Rotate(Vector3.up, Input.GetAxis("Horizontal") * turnSpeed);
-                playerRigidbody.freezeRotation = true;
-            }
         }
 
-        private void OnCollisionEnter(Collision other) 
+        private void OnCollisionEnter(Collision other)
         {
             if (other.gameObject.tag == "Terrain")
             {
